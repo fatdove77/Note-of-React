@@ -748,6 +748,10 @@ https://www.runoob.com/http/http-status-codes.html
 
 
 
+## REACT中的虚拟dom
+
+[【React深入】深入分析虚拟DOM的渲染原理和特性 - 掘金 (juejin.cn)](https://juejin.cn/post/6844903824683958286)
+
 # 业务
 
 ## 实现变量改变 css样式改变
@@ -1076,6 +1080,60 @@ input{
 ```js
 <label htmlFor='file' ><FileOutlined /></label>
 <input type="file" id='file' />
+```
+
+
+
+
+
+## css 同时触发两个hover
+
+鼠标放到父级元素上 子集元素触发伪类 
+
+```js
+.mapPoint:hover{
+  background: linear-gradient(180deg, #FF69F9 0%, #1C00FF 100%);
+}
+.mapBox:hover .mapItem{
+  background-color:#212121
+}
+
+.mapBox:hover .mapPoint{
+  background: linear-gradient(180deg, #FF69F9 0%, #1C00FF 100%);
+}
+
+```
+
+
+
+## 滚轮一动 移动一屏
+
+在最外层的css中
+
+```css
+.container{
+  height: 100vh; /* 设置容器的高度为视口的高度，即占满整个屏幕 */
+  scroll-snap-type: y mandatory; /* 启用垂直滚动时的自动对齐效果 */
+  scroll-behavior: smooth; /* 平滑滚动效果 */
+  overflow-y: auto; /* 当内容溢出容器高度时，显示滚动条 */
+  scrollbar-width: none; /* 隐藏滚动条 */
+  color:white; /* 设置文本颜色为白色 */
+  background:url(../public/img/bg.jpeg); /* 设置背景图片为指定路径下的"bg.jpeg" */
+  &::-webkit-scrollbar{
+    display: none; /* 隐藏滚动条（仅适用于WebKit内核的浏览器，如Chrome、Safari等） */
+  }
+}
+```
+
+
+
+在每一屏的最外层css
+
+```
+.W_container{
+  height: 100vh;
+  scroll-snap-align: center;
+}
 ```
 
 
@@ -1796,30 +1854,273 @@ axios
 
 
 
+## 头像上传的坑 （axios 拦截器问题）
+
+```js
+在您的代码中，请求拦截器将请求参数存储在config.data中，并且没有对请求参数进行任何处理。当您发送请求时，实际上传递的是一个File对象，而不是经过序列化或转换的数据。
+
+为了正确地发送multipart/form-data类型的请求，您需要将请求参数直接设置为FormData对象，而不是将其存储在config.data中。在请求拦截器中，您可以直接将config.data替换为FormData对象，然后删除对请求参数的其他处理。请修改您的代码
+```
+
+一开始因为拦截器的设置问题导致后端一致读不到数据
+
+### 前端
+
+```js
+import { PlusOutlined } from '@ant-design/icons';
+import { Form, Modal, Upload } from 'antd';
+import { useEffect, useState } from 'react';
+import { useItem } from '@/hooks/useItem.js'
+import axios from 'axios';
+const getBase64 = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    // reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
+  });
+const UpImage = (props) => {
+  // const {
+  //   handleImageChange
+  // } = useItem();
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState('');
+  const [previewTitle, setPreviewTitle] = useState('');
+  const [fileList, setFileList] = useState([
 
 
-引用还是scss
+  ]);
 
-最外层声明B_container
+  useEffect(()=>{
+    //将hooks的imgs更换成fileList
+    // const baseImage 
+    const formData = new FormData();
+    formData.append("file",fileList[0]?.originFileObj)
+    console.log(fileList[0]);
+    console.log(formData.get("file"));
 
-内部使用嵌套 就不用开头的下划线了 
-
-
-
-最外层设置width 100%或者100vw
-
-内层设置宽度都是无所谓的 因为盒式模型的坍塌性
-
-
-
-
+    // 等待异步操作完成后再输出 formData
+    props.handleImageChange(fileList[0]?.originFileObj)
+  },[fileList])
 
 
+// // 保存头像到后端
+// const saveAvatarToBackend = async () => {
+//   try {
+//     const formData = new FormData();
+//     formData.append('image', fileList[0]?.originFileObj);
+//     formData.append('name', "fuck");
+//     console.log(formData);
+//     const response = await axios.post('http://localhost:8800/upload', formData);
+//     // 处理后端返回的响应
+//     // ...
+//   } catch (error) {
+//     console.log('保存头像失败');
+//   }
+// }
 
-质押的时候 根据账户存储当下的时间戳
+  const handleCancel = () => setPreviewOpen(false);
+  const handlePreview = async (file) => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj);
+      console.log(file.preview);
+    }
+    setPreviewImage(file.url || file.preview);
+    setPreviewOpen(true);
+    setPreviewTitle(file.name || file.url.substring(file.url.lastIndexOf('/') + 1));
+  };
+  const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
+  const uploadButton = (
+    <div>
+      <PlusOutlined />
+      <div
+        style={{
+          marginTop: 8,
+        }}
+      >
+        Upload
+      </div>
+    </div>
+  );
+  return (
+    <div className=' mr-10' >
+      <Upload
+        listType="picture-card"
+        fileList={fileList}
+        onPreview={handlePreview}
+        onChange={handleChange}
+        accept='.jpg,.png,.jpeg'
+        // multiple = {true}
+        // action='http://localhost:8800/upload'
+      >
+        {fileList.length >= 1 ? null : uploadButton}
+      </Upload>
+      <Modal open={previewOpen} title={previewTitle} footer={null} onCancel={handleCancel}>
+        <img
+          alt="example"
+          style={{
+            width: '100%',
+          }}
+          src={previewImage}
+        />
+      </Modal>
+    </div>
+  );
+};
+export default UpImage;
+```
 
-![image-20230522114528797](REACT整理.assets/image-20230522114528797.png)
+### hooks
 
-修改这里获取的时间 存到item.time中
+```js
 
-![image-20230522115338923](REACT整理.assets/image-20230522115338923.png)
+  //上传表单
+  const postSingleItem = async () => {
+    console.log(singleItem);
+    const formData = new FormData();
+    formData.append("image",singleItem.image);
+    formData.append("name",singleItem.name);
+    formData.append("desc",singleItem.desc);
+    formData.append("amount",singleItem.amount);
+    formData.append("payWay",singleItem.payWay);
+    formData.append("isDiscount",singleItem.isDiscount);
+    console.log(formData);
+    try {
+      await postItemForm(formData)
+        .then((res) => {
+          toast.success("成功")
+          getItemData();
+        })
+    } catch (error) {
+      toast.error("数据获取出错")
+      console.log("数据获取出错");
+    } finally {
+    }
+  }
+```
+
+
+
+### api
+
+```js
+import service from '@/request/Item'
+import axios from 'axios';
+import toast, { Toaster } from 'react-hot-toast';
+
+//根据条件获取问答管理的表格 查询和获取表单操作
+export async function postItemForm(file) {
+  try {
+    // console.log({id,amount,image,isDiscount,name,desc,payWay});
+    const response = await service.post("/upload",file);
+    return response
+  } catch (error) {
+    console.log(error);
+    toast.error(error);
+  }
+}
+
+```
+
+
+
+### express
+
+```js
+import express from 'express';
+import mysql from 'mysql';
+import cors from 'cors'
+import multer from 'multer';
+import bodyParser from 'body-parser';
+import fs from 'fs';
+const app = express();  //创建一个服务器实例
+
+// import { getStage } from './stage';
+
+//简历数据库连接
+const db = mysql.createConnection({
+  host:"localhost",
+  user:"root",
+  password:"123456",
+  database:"express",  //数据库名字 不是连接名 
+})
+
+//解析formdata格式
+
+
+
+
+app.use(express.json());  //接受前端传来的json  //?类似一个自动转换？？
+app.use(cors());
+// 解析请求体中的表单数据
+app.use(bodyParser.urlencoded({ extended: true }));
+
+
+
+// 创建Multer实例，设置存储路径和文件名
+const storage = multer.diskStorage({
+  destination: 'upload/',
+  filename: function (req, file, cb) {
+    // 生成唯一的文件名，避免重复
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix);
+  }
+});
+
+// 创建Multer中间件，指定存储配置和限制条件
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 1024 * 1024 * 5 // 限制文件大小为5MB
+  }
+});
+
+app.post('/upload', multer({
+  dest: 'upload'
+}).single('image'), (req, res) => {
+  // 获取文件基本信息
+  // console.log(fileData);
+  console.log(req.body)
+  // console.log(formData.get('image'));
+  console.log(req.file);
+  const filePath = req.file.path;
+  const fileData = fs.readFileSync(filePath)
+  console.log(fileData);
+
+   const query = 'insert into items (image,itemName,itemDesc,payWay,amount,isDiscount) values (?,?,?,?,?,?)';
+  const values = [
+    fileData,
+    req.body.name,
+    req.body.desc,
+    req.body.payWay,
+    req.body.amount,
+    req.body.isDiscount,
+  ]
+  console.log(values);
+  db.query(query, [...values], (error, results) => {
+    if (error) {
+      console.error(error);
+      res.sendStatus(500);
+    } else {
+      res.sendStatus(200);
+    }
+  });
+})
+
+
+```
+
+
+
+
+
+## 使用自定义hook 每次引入都会清空数据
+
+我在addItem这个页面引用hook，这是一个表单，但是上传图片这个属性卸载了update这个组件，我想在这个组件更新图片，再次引用hook，原有表单的元素都没有了，这是因为在每次调用update的时候重新引入了hook，刷新了hook的状态值。
+
+
+
+解决办法就是使用props 传递参数而不是重新引入hook
+
+
+
