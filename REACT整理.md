@@ -362,9 +362,11 @@ try{
 
 
 
+
+
+总结一下 连接钱包主要使用window.ethereum 调用合约主要使用web3
+
 # 知识点
-
-
 
 ## 前后端调用的逻辑
 
@@ -1652,6 +1654,18 @@ export default function Home() {
   return <ReactEcharts option={getOption()} />;
 }
 ```
+
+
+
+
+
+## dayjs
+
+[安装 | Day.js中文网 (fenxianglu.cn)](https://dayjs.fenxianglu.cn/category/#node-js)
+
+
+
+
 
 
 
