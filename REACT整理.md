@@ -366,6 +366,56 @@ try{
 
 总结一下 连接钱包主要使用window.ethereum 调用合约主要使用web3
 
+
+
+## 控制转账的gas费（未实验）
+
+
+    
+```react
+import Web3 from 'web3';
+
+// 创建一个 Web3 实例
+const web3 = new Web3('https://mainnet.infura.io'); // 使用 Infura 提供的以太坊节点
+
+// 转账函数
+const transferFunds = async (fromAddress, toAddress, amount, gasPrice) => {
+  try {
+    // 获取当前以太坊网络 gasPrice
+    const currentGasPrice = await web3.eth.getGasPrice();
+// 设置自定义 gasPrice 或使用当前 gasPrice
+const selectedGasPrice = gasPrice || currentGasPrice;
+
+// 构造交易对象
+const transactionObject = {
+  from: fromAddress,
+  to: toAddress,
+  value: web3.utils.toWei(amount, 'ether'),
+  gasPrice: selectedGasPrice,
+};
+
+// 发送交易
+const transaction = await web3.eth.sendTransaction(transactionObject);
+
+console.log('Transaction hash:', transaction.transactionHash);
+
+  } catch (error) {
+    console.error('Error:', error);
+  }
+};
+
+// 使用示例
+const fromAddress = '0x123...'; // 发送者地址
+const toAddress = '0x456...'; // 接收者地址
+const amount = '1'; // 转账金额（以太为单位）
+const gasPrice = '50000000000'; // 自定义 gasPrice（可选）
+
+transferFunds(fromAddress, toAddress, amount, gasPrice);
+```
+
+
+
+
 # 知识点
 
 ## 前后端调用的逻辑
@@ -1664,6 +1714,14 @@ export default function Home() {
 [安装 | Day.js中文网 (fenxianglu.cn)](https://dayjs.fenxianglu.cn/category/#node-js)
 
 
+
+## wowjs 页面滚动css样式
+
+[酷炫的页面滚动 reveal 动画效果_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1kg41117q5/?spm_id_from=333.337.search-card.all.click&vd_source=db89d007f7de87088a6b79918a5525fc)
+
+
+
+https://wowjs.uk/docs.html
 
 
 

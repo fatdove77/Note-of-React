@@ -279,3 +279,268 @@ Object.prototype.__proto__ === null
 
 
 
+## 继承
+
+直接使用es6的关键字extends
+
+```js
+class Person {
+  constructor(name) {
+    this.name = name
+  }
+  // 原型方法
+  // 即 Person.prototype.getName = function() { }
+  // 下面可以简写为 getName() {...}
+  getName = function () {
+    console.log('Person:', this.name)
+  }
+}
+class Gamer extends Person {
+  constructor(name, age) {
+    // 子类中存在构造函数，则需要在使用“this”之前首先调用 super()。
+    super(name)
+    this.age = age
+  }
+}
+const asuna = new Gamer('Asuna', 20)
+asuna.getName() // 成功访问到父类的方法
+```
+
+
+
+
+
+## this对象的理解
+
+### 一、定义
+
+函数的 `this` 关键字在 `JavaScript` 中的表现略有不同，此外，在严格模式和非严格模式之间也会有一些差别
+
+**在绝大多数情况下，函数的调用方式决定了 `this` 的值（运行时绑定）**
+
+`this` 关键字是函数运行时自动生成的一个内部对象，只能在函数内部使用，总指向调用它的对象
+
+
+
+### 二、绑定规则
+
+根据不同的使用场合，`this`有不同的值，主要分为下面几种情况：
+
+- 默认绑定
+- 隐式绑定
+- new绑定
+- 显示绑定
+
+#### 默认绑定
+
+全局环境中定义`person`函数，内部使用`this`关键字
+
+```js
+var name = 'Jenny';
+function person() {
+    return this.name;
+}
+console.log(person());  //Jenny
+```
+
+
+
+上述代码输出`Jenny`，原因是调用函数的对象在游览器中位`window`，因此`this`指向`window`，所以输出`Jenny`
+
+注意：
+
+严格模式下，不能将全局对象用于默认绑定，this会绑定到`undefined`，只有函数运行在非严格模式下，默认绑定才能绑定到全局对象
+
+#### 隐式绑定
+
+函数还可以作为某个对象的方法调用，这时`this`就指这个上级对象
+
+```js
+function test() {
+  console.log(this.x);
+}
+
+var obj = {};
+obj.x = 1;
+obj.m = test;
+
+obj.m(); // 1
+```
+
+
+
+这个函数中包含多个对象，尽管这个函数是被最外层的对象所调用，`this`指向的也只是它上一级的对象
+
+```js
+var o = {
+    a:10,
+    b:{
+        fn:function(){
+            console.log(this.a); //undefined
+        }
+    }
+}
+o.b.fn();
+```
+
+上述代码中，`this`的上一级对象为`b`，`b`内部并没有`a`变量的定义，所以输出`undefined`，fn调用的，this指向fn,fn中没有a，所以返回undefined
+
+##### 这里再举一种特殊情况
+
+```js
+var o = {
+    a:10,
+    b:{
+        a:12,
+        fn:function(){
+            console.log(this.a); //undefined
+            console.log(this); //window
+        }
+    }
+}
+var j = o.b.fn;
+j();
+```
+
+
+
+此时`this`指向的是`window`，这里的大家需要记住，`this`永远指向的是最后调用它的对象，虽然`fn`是对象`b`的方法，**但是`fn`赋值给`j`时候并没有执行**，所以最终指向`window`
+
+#### new绑定
+
+通过构建函数`new`关键字生成一个实例对象，此时`this`指向这个实例对象
+
+```js
+function test() {
+　this.x = 1;
+}
+
+var obj = new test();
+obj.x // 1
+```
+
+
+
+上述代码之所以能过输出1，是因为`new`关键字改变了`this`的指向
+
+这里再列举一些特殊情况：
+
+**`new`过程遇到`return`一个对象，此时`this`指向为返回的对象**
+
+```js
+function fn()  
+{  
+    this.user = 'xxx';  
+    return {};  
+}
+var a = new fn();  
+console.log(a.user); //undefined
+```
+
+**如果返回一个简单类型的时候，则`this`指向实例对象**
+
+```js
+function fn()  
+{  
+    this.user = 'xxx';  
+    return 1;
+}
+var a = new fn;  
+console.log(a.user); //xxx
+```
+
+**注意的是`null`虽然也是对象，但是此时`new`仍然指向实例对象**
+
+```js
+function fn()  
+{  
+    this.user = 'xxx';  
+    return null;
+}
+var a = new fn;  
+console.log(a.user); //xxx
+```
+
+#### 显示修改
+
+`apply()、call()、bind()`是函数的一个方法，作用是改变函数的调用对象。它的第一个参数就表示改变后的调用这个函数的对象。因此，这时`this`指的就是这第一个参数
+
+```js
+var x = 0;
+function test() {
+　console.log(this.x);
+}
+
+var obj = {};
+obj.x = 1;
+obj.m = test;
+obj.m.apply(obj) // 1
+```
+
+关于`apply、call、bind`三者的区别，我们后面再详细说
+
+
+
+
+
+## 事件循环
+
+### 宏任务与微任务
+
+如果将任务划分为同步任务和异步任务并不是那么的准确，举个例子：
+
+```js
+console.log(1)
+
+setTimeout(()=>{
+    console.log(2)
+}, 0)
+
+new Promise((resolve, reject)=>{
+    console.log('new Promise')
+    resolve()
+}).then(()=>{
+    console.log('then')
+})
+
+console.log(3)
+```
+
+如果按照上面流程图来分析代码，我们会得到下面的执行步骤：
+
+- `console.log(1)`，同步任务，主线程中执行
+- `setTimeout()` ，异步任务，放到 `Event Table`，0 毫秒后`console.log(2)`回调推入 `Event Queue` 中
+- `new Promise` ，同步任务，主线程直接执行
+- `.then` ，异步任务，放到 `Event Table`
+- `console.log(3)`，同步任务，主线程执行
+
+所以按照分析，它的结果应该是 `1` => `'new Promise'` => `3` => `2` => `'then'`
+
+但是实际结果是：`1`=>`'new Promise'`=> `3` => `'then'` => `2`
+
+**出现分歧的原因在于异步任务执行顺序，事件队列其实是一个“先进先出”的数据结构，排在前面的事件会优先被主线程读取**
+
+例子中 `setTimeout`回调事件是先进入队列中的，按理说应该先于 `.then` 中的执行，但是结果却偏偏相反
+
+原因在于异步任务还可以细分为微任务与宏任务
+
+
+
+
+
+## 节流和防抖
+
+### 定义
+
+- 节流: n 秒内只运行一次，若在 n 秒内重复触发，只有一次生效
+- 防抖: n 秒后在执行该事件，若在 n 秒内被重复触发，则重新计时
+
+一个经典的比喻:
+
+想象每天上班大厦底下的电梯。把电梯完成一次运送，类比为一次函数的执行和响应
+
+假设电梯有两种运行策略 `debounce` 和 `throttle`，超时设定为15秒，不考虑容量限制
+
+电梯第一个人进来后，15秒后准时运送一次，这是节流
+
+电梯第一个人进来后，等待15秒。如果过程中又有人进来，15秒等待重新计时，直到15秒后开始运送，这是防抖
