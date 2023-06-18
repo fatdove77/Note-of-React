@@ -544,3 +544,35 @@ console.log(3)
 电梯第一个人进来后，15秒后准时运送一次，这是节流
 
 电梯第一个人进来后，等待15秒。如果过程中又有人进来，15秒等待重新计时，直到15秒后开始运送，这是防抖
+
+
+
+
+
+# css
+
+## css实现一个三角形
+
+```js
+
+.triangle {
+  width: 0;
+  height: 0;
+  border-left: 50px solid transparent;
+  border-right: 50px solid transparent;
+  border-bottom: 100px solid red;
+}
+```
+
+一个border边框可以分成四个角，四个角拼成一个长方形
+
+
+
+
+
+
+
+
+
+
+

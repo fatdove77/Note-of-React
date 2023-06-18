@@ -416,6 +416,36 @@ transferFunds(fromAddress, toAddress, amount, gasPrice);
 
 
 
+## nextjs封装框架
+
+### wagimi
+
+以太坊api的hooks 可以类比web3.eth功能
+
+https://wagmi.sh/zh-CN
+
+### rainbowkit
+
+连接钱包的api
+
+https://www.rainbowkit.com/docs/modal-sizes
+
+
+
+### Configuring Chains
+
+configureChains函数允许你用RPC供应商配置你的链，比如： Alchemy、Infura或其他东西。这意味着你不需要担心在你的连接器或公共客户端中定义RPC URLs和链条配置。这是由wagmi内部管理
+
+```js
+import { configureChains } from 'wagmi';
+```
+
+
+
+
+
+
+
 # 知识点
 
 ## 前后端调用的逻辑
@@ -1047,7 +1077,7 @@ arr.sort(compareAges);
 
 
 
-## 异步任务并行
+## Promise.all异步任务并行
 
 使用Promise.all([]).then
 
@@ -2193,6 +2223,9 @@ app.post('/upload', multer({
 
 
 解决办法就是使用props 传递参数而不是重新引入hook
+或者重写一个hook，在hook中调用，在组件中再次引入
+
+
 
 
 
