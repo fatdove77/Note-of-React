@@ -371,7 +371,7 @@ try{
 ## 控制转账的gas费（未实验）
 
 
-    
+​    
 ```react
 import Web3 from 'web3';
 
@@ -443,6 +443,48 @@ import { configureChains } from 'wagmi';
 
 
 
+
+## 封装合约的一段很牛逼的代码
+
+### 调用
+
+```js
+const { userInfo } = useSingleCallResult(AWWContract, 'userInfo', [account]);
+```
+
+```ts
+// single call result
+export function useSingleCallResult(
+  contract: Contract | null | undefined,
+  methodName: string,
+  inputs?: MethodArg[],
+): any {
+  const { account } = Web3Provider.useContainer();
+  const [data, setData] = useState<MethodArg | undefined>(undefined);
+  const fragment = useMemo(
+    () => contract?.interface?.getFunction(methodName.trim()),
+    [contract, methodName],
+  );
+
+  useEffect(() => {
+    (async () => {
+      if (!fragment) return;
+      const res = await contract?.[methodName.trim()](...(inputs ?? []));
+      setData(res);
+    })();
+  }, [contract?.address, account]); // , fragment
+
+  return useMemo(() => {
+    return toCallState(data, methodName);
+  }, [data]);
+}
+```
+
+
+
+
+
+## 大数转换
 
 
 
@@ -1760,6 +1802,35 @@ https://wowjs.uk/docs.html
 # 工具类
 
 ## 单位转换WEI
+
+```js
+import { type BigNumber } from 'bignumber.js';
+import { BigNumber as BigNumberJs } from 'bignumber.js';
+
+
+export const digitalPrecision = (
+  num: string | number,
+  decimals: number,
+  isDiv?: boolean, //   By default  
+) => {
+  // division. High-precision decimal conversion to Arabic numerals
+  if (!num) {
+    return '';
+  }
+  if (isDiv) {
+    return BigNumberJs(num.toString())
+      .div(Math.pow(10, decimals))
+      .toFixed(config.precision)
+      .toString();
+  } else {
+    // Convert to high precision decimal by default
+    return BigNumberJs(num.toString()).times(Math.pow(10, decimals)).toFixed();
+  }
+};
+
+```
+
+
 
 ```js
 // BigNumber(item.num).div(Math.pow(10,18)).toString()
