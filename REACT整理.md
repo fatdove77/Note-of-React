@@ -2300,3 +2300,13 @@ app.post('/upload', multer({
 
 
 
+# 连接时要封装好的
+
+![image-20230619180206536](REACT整理.assets/image-20230619180206536.png)
+
+
+
+
+
+
+
