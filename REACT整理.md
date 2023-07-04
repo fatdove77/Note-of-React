@@ -804,7 +804,20 @@ obj?.name  //obj是一个对象如果有name属性那么取出来否则返回und
 
 
 
+## &&和||
 
+```js
+// 🎉✨ This is my 100th question! ✨🎉
+
+const output = `${[] && 'Im'}possible!
+You should${'' && `n't`} see a therapist after so much JavaScript lol`
+```
+
+`[]`是一个真值。 使用`&&`运算符，如果左侧值是真值，则返回右侧值。 在这种情况下，左侧值`[]`是一个真值，所以返回`Im`。
+
+
+
+使用`||`运算符，我们可以返回第一个真值。 如果所有值都是假值，则返回最后一个值。
 
 ## git 拉取主分支到自己分支
 
@@ -2297,6 +2310,16 @@ app.post('/upload', multer({
 或者重写一个hook，在hook中调用，在组件中再次引入
 
 
+
+
+
+## 自定义hooks中使用另一个hook的问题
+
+```js
+ const { account } = useWeb3React(); //这个是异步调用另一个hook  所以也会消耗一定的时间
+这就导致了第一次使用useEffect中代码调用一个需要account的方法，account是空的
+
+```
 
 
 
