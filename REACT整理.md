@@ -488,6 +488,23 @@ export function useSingleCallResult(
 
 
 
+
+
+
+
+## chain_id和network_id
+
+在区块链中，`networkId`和`chainId`是两个不同的概念，尽管它们在某些情况下可能具有相同的值，但它们表示的含义略有不同。
+
+1. `networkId`（网络标识符）：`networkId`是一个数字，用于标识不同的区块链网络。每个区块链网络都可以被分配一个唯一的`networkId`。例如，以太坊主网络（Mainnet）的`networkId`为1，Ropsten测试网络的`networkId`为3，Kovan测试网络的`networkId`为42等。`networkId`通常在连接到区块链网络时使用，以便确定正在连接的是哪个网络。它用于确保节点和应用程序在正确的网络上运行，并与其他节点进行通信。
+2. `chainId`（链标识符）：`chainId`是一个数字，用于标识不同的区块链链（Chain）。在以太坊中，`chainId`用于区分主网络和各种测试网络之间的不同。具有相同`chainId`的网络被认为是同一条链。例如，以太坊主网络（Mainnet）的`chainId`为1，Ropsten测试网络的`chainId`也为1，但它们是不同的网络，因为它们具有不同的`networkId`。`chainId`通常在智能合约开发和交易签名中使用，以确保交易在正确的链上进行，并防止跨链攻击。
+
+虽然在某些情况下，`networkId`和`chainId`可能具有相同的值，但它们的含义和用途是不同的。`networkId`用于标识不同的区块链网络，而`chainId`用于标识不同的区块链链。在开发和使用区块链应用程序时，了解和正确使用这些标识符是非常重要的，以确保应用程序在正确的网络和链上运行。
+
+
+
+
+
 # 知识点
 
 ## 前后端调用的逻辑
